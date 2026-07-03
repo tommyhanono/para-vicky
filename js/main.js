@@ -83,10 +83,6 @@
   var vg = el('vickyGrid');
   D.vicky.forEach(function (it) { vg.appendChild(makePhoto(it, 'ph', vickyGroup)); });
 
-  var tommyGroup = [];
-  var tg = el('tommyGrid');
-  D.tommy.forEach(function (it) { tg.appendChild(makePhoto(it, 'ph', tommyGroup)); });
-
   /* ---------- REVEAL + PARALLAX (un solo handler de scroll) ---------- */
   var revealPending = [];
   function checkReveals() {
@@ -134,25 +130,38 @@
     update();
   }
 
-  /* ---------- CONTADOR ---------- */
+  /* ---------- CONTADORES ---------- */
   function two(n) { return (n < 10 ? '0' : '') + n; }
-  function initCountdown() {
+
+  // Cuánto tiempo llevamos juntos — cuenta hacia arriba desde el 11-oct-2025
+  function initTogether() {
+    var novios = new Date('2025-10-11T00:00:00'); // hora local del teléfono
+    var first = new Date(D.meta.firstDate + 'T00:00:00');
+    var since = el('tgSince');
+    function tick() {
+      var now = new Date();
+      var diff = Math.max(0, now - novios);
+      el('tgDays').textContent = Math.floor(diff / 86400000);
+      el('tgHours').textContent = two(Math.floor((diff % 86400000) / 3600000));
+      el('tgMins').textContent = two(Math.floor((diff % 3600000) / 60000));
+      el('tgSecs').textContent = two(Math.floor((diff % 60000) / 1000));
+      var d0 = Math.floor((now - first) / 86400000);
+      since.textContent = 'y ' + d0 + ' días desde nuestra primera foto juntos · 19 de agosto de 2025';
+    }
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  // Cuánto falta para vernos — cuenta hacia abajo hasta el 19-jul-2026
+  function initReunion() {
     var reunion = new Date(D.meta.reunion + 'T00:00:00'); // hora local del teléfono
     var dayAfter = new Date(reunion.getTime() + 24 * 3600 * 1000);
-    var first = new Date(D.meta.firstDate + 'T00:00:00');
-    var section = el('countdown');
+    var section = el('reunion');
     var clock = el('cdClock');
     var label = el('cdLabel');
     var sub = el('cdSub');
-    var since = el('cdSince');
-
     function tick() {
       var now = new Date();
-
-      // días desde la primera foto
-      var d0 = Math.floor((now - first) / 86400000);
-      since.textContent = d0 + ' días desde nuestra primera foto juntos · 19 de agosto de 2025';
-
       if (now >= dayAfter) {
         section.classList.add('is-today');
         clock.innerHTML = '<p class="countdown__today">Y por fin,<br>juntos de nuevo ❤</p>';
@@ -164,25 +173,17 @@
         section.classList.add('is-today');
         clock.innerHTML = '<p class="countdown__today">¡Hoy nos vemos! ❤</p>';
         label.textContent = 'Por fin llegó el día';
-        sub.textContent = 'Corré a abrazarme.';
+        sub.textContent = 'Corre a abrazarme.';
         return true;
       }
-
       var diff = reunion - now;
-      var days = Math.floor(diff / 86400000);
-      var hrs = Math.floor((diff % 86400000) / 3600000);
-      var mins = Math.floor((diff % 3600000) / 60000);
-      var secs = Math.floor((diff % 60000) / 1000);
-      el('cdDays').textContent = days;
-      el('cdHours').textContent = two(hrs);
-      el('cdMins').textContent = two(mins);
-      el('cdSecs').textContent = two(secs);
+      el('cdDays').textContent = Math.floor(diff / 86400000);
+      el('cdHours').textContent = two(Math.floor((diff % 86400000) / 3600000));
+      el('cdMins').textContent = two(Math.floor((diff % 3600000) / 60000));
+      el('cdSecs').textContent = two(Math.floor((diff % 60000) / 1000));
       return false;
     }
-
-    if (!tick()) {
-      setInterval(tick, 1000);
-    }
+    if (!tick()) setInterval(tick, 1000);
   }
 
   /* ---------- LIGHTBOX ---------- */
@@ -245,5 +246,6 @@
   /* ---------- INIT ---------- */
   initReveal();
   initScroll();
-  initCountdown();
+  initTogether();
+  initReunion();
 })();
